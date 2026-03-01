@@ -1,0 +1,29 @@
+{
+    "name": "YoRoutine",
+    "short_name": "YoRoutine",
+    "description": "Premium Gamified Habit & Routine Tracker",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#121415",
+    "theme_color": "#0ce473",
+    "icons": [
+        {
+            "src": "app-icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "app-icon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "app-icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

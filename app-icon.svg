@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1A1C1F"/>
+      <stop offset="100%" stop-color="#121415"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <!-- Green circle ring -->
+  <circle cx="256" cy="240" r="120" fill="none" stroke="#0ce473" stroke-width="16" opacity="0.2"/>
+  <circle cx="256" cy="240" r="120" fill="none" stroke="#0ce473" stroke-width="16" stroke-dasharray="754" stroke-dashoffset="188" stroke-linecap="round"/>
+  <!-- Checkmark -->
+  <polyline points="208,240 244,276 312,204" fill="none" stroke="#0ce473" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Small streak dots at bottom -->
+  <circle cx="216" cy="380" r="8" fill="#0ce473" opacity="0.3"/>
+  <circle cx="244" cy="380" r="8" fill="#0ce473" opacity="0.5"/>
+  <circle cx="272" cy="380" r="8" fill="#0ce473" opacity="0.75"/>
+  <circle cx="300" cy="380" r="8" fill="#0ce473"/>
+</svg>

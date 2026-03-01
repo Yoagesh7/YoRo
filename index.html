@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YoRoutine</title>
+    <!-- Google Fonts: Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons -->
+    <!-- PWA & Mobile Install -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121415">
+    <link rel="icon" type="image/svg+xml" href="app-icon.svg">
+    <link rel="apple-touch-icon" href="app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Lucide Icons (UMD for better reliability) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- AUTH SCREEN (Login / Sign Up) -->
+    <div class="onboarding-screen hidden" id="onboarding-screen">
+        <div class="onboarding-card">
+            <div class="onboarding-icon">
+                <img src="app-icon.svg" alt="YoRoutine" style="width:72px; height:72px;">
+            </div>
+            <h1 class="onboarding-title">Welcome to <span style="color:var(--accent)">YoRoutine</span></h1>
+            <p class="onboarding-sub">Level up your life with gamified habit tracking.</p>
+
+            <!-- Tab Switcher -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+                <button class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+            </div>
+
+            <!-- SIGN UP FORM -->
+            <div class="onboarding-form" id="form-signup">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="signup-username" maxlength="25" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a password">
+                </div>
+                <div class="form-group">
+                    <label>Referral Code <span style="color:var(--muted-text)">(optional)</span></label>
+                    <input type="text" id="signup-referral" maxlength="10" placeholder="e.g. YO-A3F8">
+                </div>
+                <div class="auth-error hidden" id="signup-error"></div>
+                <button class="btn btn-primary w-full mt-4" onclick="handleSignup()"
+                    style="padding: 0.85rem 1.5rem; font-size: 1rem;">
+                    <i data-lucide="rocket"></i> Start Your Journey
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div class="onboarding-form hidden" id="form-login">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" maxlength="25" placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
+                </div>
+                <div class="auth-error hidden" id="login-error"></div>
+                <button class="btn btn-primary w-full mt-4" onclick="handleLogin()"
+                    style="padding: 0.85rem 1.5rem; font-size: 1rem;">
+                    <i data-lucide="log-in"></i> Login
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CELEBRATION MODAL (for referral bonus) -->
+    <div class="celebration-modal hidden" id="celebration-modal">
+        <div class="celebration-content">
+            <div class="confetti-burst" id="confetti-burst"></div>
+            <div class="celebration-icon">🎉</div>
+            <h2>Bonus XP Earned!</h2>
+            <p>You and your friend both earned <strong style="color:var(--accent);">+100 XP</strong> from the referral!
+            </p>
+            <button class="btn btn-primary mt-4" onclick="closeCelebration()" style="padding: 0.75rem 2rem;">Let's
+                Go!</button>
+        </div>
+    </div>
+
+    <!-- NAME PROMPT MODAL (after login/signup) -->
+    <div class="name-prompt-modal hidden" id="name-prompt-modal">
+        <div class="name-prompt-content">
+            <div class="name-prompt-icon">👋</div>
+            <h2>What should we call you?</h2>
+            <p>Enter your name to personalize your experience.</p>
+            <div class="form-group" style="width:100%; margin-top:1rem;">
+                <input type="text" id="name-prompt-input" maxlength="25" placeholder="Enter your name">
+            </div>
+            <button class="btn btn-primary w-full mt-4" onclick="saveNamePrompt()"
+                style="padding: 0.85rem 1.5rem; font-size: 1rem;">
+                <i data-lucide="check"></i> Let's Go!
+            </button>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <i data-lucide="compass" class="logo-icon"></i>
+                <span class="logo-text">YoRoutine</span>
+            </div>
+
+            <!-- Desktop Nav Links -->
+            <nav class="desktop-nav">
+                <a href="#" class="nav-link active" onclick="switchView('dashboard')"><i
+                        data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="#" class="nav-link" onclick="switchView('achievements')"><i data-lucide="trophy"></i>
+                    Achievements</a>
+                <a href="#" class="nav-link" onclick="switchView('shop')"><i data-lucide="shopping-cart"></i>
+                    Shop</a>
+                <a href="#" class="nav-link" id="sidebar-install-link" onclick="showPwaBanner(); return false;"
+                    style="display:none;"><i data-lucide="download"></i> Install App</a>
+            </nav>
+            <div class="header-right">
+                <!-- Theme Toggle -->
+                <button class="btn-icon theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                    <i data-lucide="sun" id="theme-icon"></i>
+                </button>
+
+                <!-- Coins Badge -->
+                <div class="coins-badge">
+                    <span class="coin-icon">🪙</span>
+                    <span id="header-coins">0</span>
+                </div>
+
+                <!-- Streak Badge -->
+                <div class="streak-badge">
+                    <i data-lucide="flame" class="streak-icon"></i>
+                    <span id="header-streak">0</span>
+                </div>
+
+                <!-- Profile Avatar Link -->
+                <div class="profile-link" onclick="switchView('profile')">
+                    <div class="avatar-sm" id="header-avatar">
+                        <i data-lucide="user"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Application Layout -->
+    <div class="layout-container">
+
+        <!-- Sidebar (Hidden on Mobile) -->
+        <aside class="sidebar">
+            <!-- Progress / Profile Card -->
+            <div class="card profile-card" onclick="switchView('profile')">
+                <div class="avatar-lg-wrapper">
+                    <div class="avatar-lg">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <div class="level-badge" id="sidebar-level">Lvl 1</div>
+                </div>
+                <h2 class="profile-name" id="sidebar-name">Productivity Master</h2>
+
+                <div class="xp-progress-container">
+                    <div class="xp-labels">
+                        <span class="xp-label">Rank Progress</span>
+                        <span class="xp-numbers"><span id="sidebar-xp">0</span> / 100 XP</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="sidebar-progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Streak Details -->
+            <div class="card streak-details-card">
+                <div class="streak-header">
+                    <div class="streak-icon-wrapper">
+                        <i data-lucide="flame"></i>
+                    </div>
+                    <div>
+                        <h3 class="streak-title">Active Streak</h3>
+                        <p class="streak-subtitle">Don't break the chain!</p>
+                    </div>
+                </div>
+                <div class="streak-count-lg">
+                    <span id="sidebar-streak-lg">0</span> Days
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-section active">
+                <div class="board-header">
+                    <div class="board-titles">
+                        <h1><span class="desktop-only">Quest Board</span><span class="mobile-only"
+                                id="mobile-greeting">Hi, User</span></h1>
+                        <p class="desktop-only">Select a quest to begin your adventure today.</p>
+                        <p class="mobile-only quote-text" id="daily-quote">Discipline is the bridge between goals and
+                            results.</p>
+                    </div>
+                    <div class="board-actions">
+                        <button class="btn btn-primary" onclick="openNewQuestModal()"><i data-lucide="plus"></i> New
+                            Quest</button>
+                    </div>
+                </div>
+
+                <!-- Task List Container -->
+                <div class="task-list" id="task-list">
+                    <!-- Tasks injected by app.js -->
+                </div>
+
+                <!-- Activity Log -->
+                <div class="card weekly-report-card">
+                    <div class="weekly-header">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <i data-lucide="activity"></i>
+                            <h2>Activity Log</h2>
+                        </div>
+                    </div>
+                    <div id="weekly-chart" class="activity-log-grid">
+                        <!-- Injected by app.js -->
+                    </div>
+                    <div class="activity-legend">
+                        <span>Less</span>
+                        <div class="legend-box lv-0"></div>
+                        <div class="legend-box lv-1"></div>
+                        <div class="legend-box lv-2"></div>
+                        <div class="legend-box lv-3"></div>
+                        <div class="legend-box lv-4"></div>
+                        <span>More</span>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ACHIEVEMENTS VIEW -->
+            <section id="view-achievements" class="view-section hidden">
+                <div class="board-header">
+                    <div class="board-titles">
+                        <h1>Achievements</h1>
+                        <p>Unlock badges as you level up and maintain your daily routine.</p>
+                    </div>
+                </div>
+
+                <div class="achievements-grid" id="achievements-grid">
+                    <!-- Achievements injected by app.js -->
+                </div>
+            </section>
+
+            <!-- SHOP VIEW -->
+            <section id="view-shop" class="view-section hidden">
+                <div class="board-header">
+                    <div class="board-titles">
+                        <h1>Shop</h1>
+                        <p>Spend your coins on rings, avatars, and more!</p>
+                    </div>
+                    <div class="shop-balance">
+                        <span class="coin-icon-lg">🪙</span>
+                        <span class="shop-balance-amount" id="shop-coin-balance">0</span>
+                        <span class="shop-balance-label">Coins</span>
+                    </div>
+                </div>
+                <div id="shop-items-container">
+                    <!-- Items injected by renderShop() -->
+                </div>
+            </section>
+
+
+            <!-- PROFILE VIEW -->
+            <section id="view-profile" class="view-section hidden">
+                <div class="profile-settings-card">
+                    <div class="profile-settings-glow"></div>
+
+                    <h1 class="profile-settings-title">Character Profile</h1>
+
+                    <div class="avatar-xl-wrapper" id="profile-avatar-wrapper">
+                        <div class="avatar-xl">
+                            <i data-lucide="user"></i>
+                        </div>
+                        <div class="level-badge" id="profile-level">Lvl 1</div>
+                        <button class="avatar-edit-btn" onclick="toggleRingPicker()" title="Change Ring">
+                            <i data-lucide="pencil"></i>
+                        </button>
+                    </div>
+
+                    <!-- Ring Picker (hidden by default) -->
+                    <div class="ring-picker hidden" id="ring-picker">
+                        <div class="ring-picker-option" onclick="selectRing('none')" data-ring="none">
+                            <div class="ring-option-circle"></div>
+                            <span>None</span>
+                        </div>
+                        <div class="ring-picker-option locked" onclick="selectRing('ring-green')" data-ring="ring-green"
+                            data-level="2">
+                            <div class="ring-option-circle ring-green"></div>
+                            <span>Green</span>
+                            <span class="ring-lock-label">Lvl 2</span>
+                        </div>
+                        <div class="ring-picker-option locked" onclick="selectRing('ring-purple')"
+                            data-ring="ring-purple" data-level="3">
+                            <div class="ring-option-circle ring-purple"></div>
+                            <span>Purple</span>
+                            <span class="ring-lock-label">Lvl 3</span>
+                        </div>
+                        <div class="ring-picker-option locked" onclick="selectRing('ring-gold')" data-ring="ring-gold"
+                            data-level="5">
+                            <div class="ring-option-circle ring-gold"></div>
+                            <span>Gold</span>
+                            <span class="ring-lock-label">Lvl 5</span>
+                        </div>
+                        <div class="ring-picker-option locked" onclick="selectRing('ring-fire')" data-ring="ring-fire"
+                            data-level="10">
+                            <div class="ring-option-circle ring-fire"></div>
+                            <span>Fire</span>
+                            <span class="ring-lock-label">Lvl 10</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-form">
+                        <div class="form-group">
+                            <label>Display Name</label>
+                            <input type="text" id="nameInput" maxlength="25" placeholder="Enter your hero name">
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <span class="stat-value" id="profile-total-xp">0</span>
+                                <span class="stat-label">Total XP</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-value" id="profile-streak-val">0</span>
+                                <span class="stat-label">Day Streak</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-value" id="profile-tasks-done">0</span>
+                                <span class="stat-label">Today Done</span>
+                            </div>
+                        </div>
+
+                        <!-- Level Progress Bar -->
+                        <div class="profile-xp-progress">
+                            <div class="profile-xp-row">
+                                <span class="profile-xp-title">Level Progress</span>
+                                <span class="profile-xp-numbers" id="profile-xp-label">0 / 500 XP</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="profile-progress-fill"></div>
+                            </div>
+                        </div>
+
+                        <!-- Consistency Contribution Graph -->
+                        <div class="contribution-section">
+                            <h3 class="contribution-title">Consistency Report</h3>
+                            <div class="contribution-wrapper">
+                                <div class="contribution-grid" id="contribution-grid">
+                                    <!-- Boxes injected by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Referral Code -->
+                        <div class="referral-section">
+                            <h3 class="contribution-title">Invite Friends</h3>
+                            <p style="font-size:0.8rem; color:var(--muted-text); margin-bottom:0.75rem;">Share your code
+                                — you both earn <strong style="color:var(--accent)">+100 XP</strong>!</p>
+                            <div class="referral-code-box">
+                                <span id="my-referral-code" class="referral-code-text">YO-XXXX</span>
+                                <button class="btn btn-secondary referral-copy-btn" onclick="copyReferralCode()">
+                                    <i data-lucide="copy"></i> Copy
+                                </button>
+                                <button class="btn btn-primary referral-share-btn" onclick="shareReferralCode()">
+                                    <i data-lucide="share-2"></i> Share
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-full mt-4" onclick="saveProfile()" id="saveProfileBtn">
+                            <i data-lucide="save"></i> Save & Return
+                        </button>
+                        <button class="btn btn-secondary w-full mt-4" onclick="logout()"
+                            style="color: #ef4444; border-color: rgba(239,68,68,0.3);">
+                            <i data-lucide="log-out"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <a href="#" class="mobile-nav-item active" onclick="switchView('dashboard')" id="nav-dashboard">
+            <i data-lucide="home"></i>
+            <span>Board</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="switchView('achievements')" id="nav-achievements">
+            <i data-lucide="trophy"></i>
+            <span>Badges</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="switchView('profile')" id="nav-profile">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="switchView('shop')" id="nav-shop">
+            <i data-lucide="shopping-bag"></i>
+            <span>Shop</span>
+        </a>
+    </nav>
+
+    <!-- New Quest Modal -->
+    <div class="modal-backdrop hidden" id="newQuestModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create New Quest</h2>
+                <button class="btn-icon" onclick="closeNewQuestModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label>Quest Title</label>
+                    <input type="text" id="questTitle" placeholder="e.g. Read 10 pages">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="questDesc" placeholder="e.g. Chapter 4 of the new book">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category Tag</label>
+                        <select id="questTag">
+                            <option value="DAILY" style="color:#10b981;">DAILY</option>
+                            <option value="PROJECT" style="color:#eab308;">PROJECT</option>
+                            <option value="FITNESS" style="color:#a855f7;">FITNESS</option>
+                            <option value="WORK" style="color:#3b82f6;">WORK</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Time Required</label>
+                        <input type="text" id="questTime" placeholder="e.g. 15m">
+                    </div>
+                    <div class="form-group">
+                        <label>XP Reward</label>
+                        <input type="number" id="questXp" value="25" min="5" max="40">
+                    </div>
+                </div>
+                <button class="btn btn-primary w-full mt-4" onclick="addNewQuest()"><i data-lucide="swords"></i> Add to
+                    Board</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA INSTALL PROMPT BANNER -->
+    <div id="pwa-install-banner" class="pwa-banner hidden">
+        <div class="pwa-banner-content">
+            <div class="pwa-logo-wrapper">
+                <img src="app-icon.svg" alt="YoRoutine Icon">
+            </div>
+            <div class="pwa-text-info">
+                <h3>Install YoRoutine App</h3>
+                <p>Add to home screen for the full premium experience! 🔥</p>
+            </div>
+            <div class="pwa-actions">
+                <button class="btn btn-secondary btn-sm" onclick="dismissInstallPrompt()">Not Now</button>
+                <button class="btn btn-primary btn-sm" id="pwa-install-btn">Install</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered', reg))
+                    .catch(err => console.error('Service Worker sync failed', err));
+            });
+        }
+    </script>
+</body>
+
+</html>
